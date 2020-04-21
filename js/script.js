@@ -1,6 +1,7 @@
 'use strict';
 window.addEventListener('DOMContentLoaded', () => {
 
+
 	// Таймер
 	const countTimer = (deadline, hoursElement, minutesElement, secondsElement) => {
 
@@ -62,6 +63,7 @@ window.addEventListener('DOMContentLoaded', () => {
 		'#timer-seconds'
 	);
 
+
 	// Меню
 	const toggleMenu = () => {
 		const btnMenu = document.querySelector('.menu'),
@@ -80,6 +82,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	toggleMenu();
 
+
 	// Поп-ап
 
 	const togglePopup = () => {
@@ -88,10 +91,6 @@ window.addEventListener('DOMContentLoaded', () => {
 			popupClose = document.querySelector('.popup-close'),
 			popupContent = popup.querySelector('.popup-content'),
 			popupStyles = getComputedStyle(popup);
-
-		// 	() => {
-		// 	popup.style.display = `block`;
-		// }));
 
 		const popupHandler = () => {
 			let count = -50;
@@ -139,4 +138,45 @@ window.addEventListener('DOMContentLoaded', () => {
 	};
 
 	togglePopup();
+
+
+	// Скроллы
+
+	const scroll = () => {
+		const nextSlideBtn = document.querySelector(`main`).querySelector(`a`);
+
+		const animate = ({ timing, draw, duration }) => {
+			const start = performance.now();
+
+			requestAnimationFrame(function animate(time) {
+				let timeFraction = (time - start) / duration;
+				if (timeFraction > 1) timeFraction = 1;
+
+				const progress = timing(timeFraction);
+
+				draw(progress);
+
+				if (timeFraction < 1) {
+					requestAnimationFrame(animate);
+				}
+			});
+		};
+
+		nextSlideBtn.addEventListener('click', e => {
+			e.preventDefault();
+			animate({
+				duration: 700,
+				timing(timeFraction) {
+					return timeFraction;
+				},
+				draw(progress) {
+					if (document.documentElement.scrollTop < 830) {
+						document.documentElement.scrollTop += progress * 50;
+					}
+				}
+			});
+		});
+	};
+
+	scroll();
 });
