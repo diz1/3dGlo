@@ -93,7 +93,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 	// Поп-ап
-
 	const togglePopup = () => {
 		const popup = document.querySelector('.popup'),
 			popupBtn = document.querySelectorAll('.popup-btn'),
@@ -153,7 +152,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 	// Скроллы
-
 	const scroll = () => {
 		const nextSlideBtn = document.querySelector(`main`).querySelector(`a`);
 
@@ -192,8 +190,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	scroll();
 
-	// Табы
 
+	// Табы
 	const tabs = () => {
 		const tabHeader = document.querySelector('.service-header'),
 			tab = tabHeader.querySelectorAll('.service-header-tab'),
@@ -229,11 +227,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 	// Слайдер
-
 	const slider = (time = 2500) => {
 		const slide = document.querySelectorAll('.portfolio-item'),
 			dotsList = document.querySelector('.portfolio-dots'),
-			// dot = document.querySelectorAll('.dot'),
 			slider = document.querySelector('.portfolio-content');
 
 		const addDots = (dotList, sliderList) => {
@@ -327,4 +323,53 @@ window.addEventListener('DOMContentLoaded', () => {
 	};
 
 	slider(2500);
+
+
+	// Калькулятор
+	const calc = () => {
+		const calcBlock = document.querySelector('.calc');
+
+		calcBlock.addEventListener('input', e => {
+			let target = e.target;
+			target = target.closest('input.calc-item');
+			if (target) {
+				target.value = target.value.replace(/\D/, '');
+			}
+		});
+	};
+
+	calc();
+
+
+	// Наша команда
+	const team = () => {
+		const commandPhoto = document.querySelectorAll('.command__photo'),
+			commandBlock = document.querySelector('.command'),
+			getDefaultImagesSrc = () => {
+				const defaultSrc = [];
+				commandPhoto.forEach((item, index) => {
+					defaultSrc.push({ itemSrc: item.src, itemInd: index });
+				});
+
+				defaultSrc.forEach(item => {
+					item.itemSrc = item.itemSrc.replace(/.+(?=images)/, '');
+				});
+				return defaultSrc;
+			},
+			defaultSrc = getDefaultImagesSrc();
+
+		commandBlock.addEventListener('mouseover', e => {
+			let target = e.target;
+			target = target.closest('img.command__photo');
+			commandPhoto.forEach((item, index) => {
+				if (target === item) {
+					item.src = item.dataset.img;
+				} else if (!target) {
+					item.src = defaultSrc[index].itemSrc;
+				}
+			});
+		});
+	};
+
+	team();
 });
