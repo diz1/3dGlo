@@ -206,6 +206,18 @@ window.addEventListener('DOMContentLoaded', () => {
 					elem.classList.remove('sk-rotating-plane');
 				}
 			},
+			ajaxHandler = {
+				success() {
+					ajaxLoader.remove(message.status);
+					message.status.textContent = message.success;
+				},
+				error(status) {
+					ajaxLoader.remove(message.status);
+					message.status.textContent = message.error;
+					console.warn(status.code);
+					console.warn(status.text);
+				}
+			},
 			forms = [...document.forms];
 		message.status.style.cssText = 'font-size: 2rem';
 
@@ -268,19 +280,6 @@ window.addEventListener('DOMContentLoaded', () => {
 			formElements.forEach(item => item.value = '');
 		};
 
-		const ajaxHandler = {
-			success() {
-				ajaxLoader.remove(message.status);
-				message.status.textContent = message.success;
-			},
-			error(status) {
-				ajaxLoader.remove(message.status);
-				message.status.textContent = message.error;
-				console.warn(status.code);
-				console.warn(status.text);
-			}
-		};
-
 		forms.forEach(form => {
 			const formElements = [...form],
 				reg = /^[^a-zа-я\s]+$/i;
@@ -300,8 +299,10 @@ window.addEventListener('DOMContentLoaded', () => {
 				clearInputs(formElements);
 				ajaxLoader.add(message.status);
 				form.append(message.status);
+
 				const formData = new FormData(form);
 				const body = {};
+
 				formData.forEach((item, index) => {
 					body[index] = item;
 				});
