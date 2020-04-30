@@ -198,6 +198,14 @@ window.addEventListener('DOMContentLoaded', () => {
 				success: `Спасибо! Мы скоро с вами свяжемся!`,
 				status: document.createElement('div'),
 			},
+			ajaxLoader = {
+				add(elem) {
+					elem.classList.add('sk-rotating-plane');
+				},
+				remove(elem) {
+					elem.classList.remove('sk-rotating-plane');
+				}
+			},
 			forms = [...document.forms];
 		message.status.style.cssText = 'font-size: 2rem';
 
@@ -210,17 +218,13 @@ window.addEventListener('DOMContentLoaded', () => {
 					def = template.replace(/\D/g, ""),
 					val = this.value.replace(/\D/g, "");
 				let i = 0,
-					newValue = template.replace(/[_\d]/g, function (a) {
-						return i < val.length ? val.charAt(i++) || def.charAt(i) : a;
-					});
+					newValue = template.replace(/[_\d]/g, a => (i < val.length ? val.charAt(i++) || def.charAt(i) : a));
 				i = newValue.indexOf("_");
 				if (i != -1) {
 					newValue = newValue.slice(0, i);
 				}
 				let reg = template.substr(0, this.value.length).replace(/_+/g,
-					function (a) {
-						return "\\d{1," + a.length + "}";
-					}).replace(/[+()]/g, "\\$&");
+					a => "\\d{1," + a.length + "}").replace(/[+()]/g, "\\$&");
 				reg = new RegExp("^" + reg + "$");
 				if (!reg.test(this.value) || this.value.length < 5 || keyCode > 47 && keyCode < 58) {
 					this.value = newValue;
@@ -238,27 +242,49 @@ window.addEventListener('DOMContentLoaded', () => {
 		maskPhone('#form2-phone');
 		maskPhone('#form3-phone');
 
-		const postData = (body, outputData, errorData, formElements) => {
-			const xhr = new XMLHttpRequest();
-			xhr.addEventListener('readystatechange', () => {
-				if (xhr.readyState !== 4) {
+		const postData = body => new Promise((resolve, reject) => {
+			const req = new XMLHttpRequest();
+			req.addEventListener('readystatechange', () => {
+				if (req.readyState !== 4) {
 					return;
 				}
-				if (xhr.status === 200) {
-					outputData();
+				if (req.status === 200) {
+					// const response = JSON.parse(req.responseText);
+					resolve();
 				} else {
-					errorData(xhr.status, xhr.statusText);
+					const status = {
+						code: req.status,
+						text: req.statusText
+					};
+					reject(status);
 				}
 			});
-			xhr.open('POST', '/server.php');
-			xhr.setRequestHeader('Content-Type', 'application/json');
-			xhr.send(JSON.stringify(body));
+			req.open('POST', '/server.php');
+			req.setRequestHeader('Content-Type', 'application/json');
+			req.send(JSON.stringify(body));
+		});
+
+		const clearInputs = formElements => {
 			formElements.forEach(item => item.value = '');
+		};
+
+		const ajaxHandler = {
+			success() {
+				ajaxLoader.remove(message.status);
+				message.status.textContent = message.success;
+			},
+			error(status) {
+				ajaxLoader.remove(message.status);
+				message.status.textContent = message.error;
+				console.warn(status.code);
+				console.warn(status.text);
+			}
 		};
 
 		forms.forEach(form => {
 			const formElements = [...form],
 				reg = /^[^a-zа-я\s]+$/i;
+
 			form.addEventListener('input', e => {
 				const target = e.target;
 				if (target.tagName.toLowerCase() === 'input' &&
@@ -268,24 +294,21 @@ window.addEventListener('DOMContentLoaded', () => {
 					}
 				}
 			});
+
 			form.addEventListener('submit', e => {
 				e.preventDefault();
-				message.status.classList.add('sk-rotating-plane');
+				clearInputs(formElements);
+				ajaxLoader.add(message.status);
 				form.append(message.status);
 				const formData = new FormData(form);
 				const body = {};
 				formData.forEach((item, index) => {
 					body[index] = item;
 				});
-				postData(body, () => {
-					message.status.classList.remove('sk-rotating-plane');
-					message.status.textContent = message.success;
-				}, (error, errorText) => {
-					message.status.classList.remove('sk-rotating-plane');
-					message.status.textContent = message.error;
-					console.log(error);
-					console.log(errorText);
-				}, formElements);
+
+				postData(body)
+					.then(ajaxHandler.success)
+					.catch(ajaxHandler.error);
 			});
 		});
 	};
