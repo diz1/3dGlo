@@ -146,7 +146,7 @@ html {
 .search__list {
 	position: absolute;
 	left: 0;
-	top: 32px;
+	top: 98%;
 	z-index: 1000;
 
 	width: 100%;
@@ -160,14 +160,18 @@ html {
 	color: #212121;
 }
 
-
 .search__list--hide {
 	visibility: hidden;
 }
 
 .search__list--item {
 	cursor: pointer;
-	padding: .3em 0 .3em 0.3em;
+	padding: .3em 0 .3em .3em;
+}
+
+.search__list--item:hover {
+	background-color: #f4f4f4;
+	border-radius: 5px;
 }
 
 .list__item-title {
@@ -239,10 +243,9 @@ html {
 }
 
 /* @=================================== Media ====================================================================================================================================== */
-@media (max-width: 635px) {
+@media (max-width: 645px) {
 
 	.search__header {
-		/*text-align: center;*/
 		padding-left: 0.2em;
 	}
 
