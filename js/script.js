@@ -200,6 +200,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			},
 			ajaxLoader = {
 				add(elem) {
+					elem.textContent = '';
 					elem.classList.add('sk-rotating-plane');
 				},
 				remove(elem) {
@@ -219,7 +220,10 @@ window.addEventListener('DOMContentLoaded', () => {
 				}
 			},
 			forms = [...document.forms];
-		message.status.style.cssText = 'font-size: 2rem';
+		message.status.style.cssText = `
+			font-size: 2rem;
+			color: #fff;
+		`;
 
 		function maskPhone(selector, masked = '+7 (___) ___-__-__') {
 			const elem = document.querySelector(selector);
@@ -254,26 +258,12 @@ window.addEventListener('DOMContentLoaded', () => {
 		maskPhone('#form2-phone');
 		maskPhone('#form3-phone');
 
-		const postData = body => new Promise((resolve, reject) => {
-			const req = new XMLHttpRequest();
-			req.addEventListener('readystatechange', () => {
-				if (req.readyState !== 4) {
-					return;
-				}
-				if (req.status === 200) {
-					// const response = JSON.parse(req.responseText);
-					resolve();
-				} else {
-					const status = {
-						code: req.status,
-						text: req.statusText
-					};
-					reject(status);
-				}
-			});
-			req.open('POST', '/server.php');
-			req.setRequestHeader('Content-Type', 'application/json');
-			req.send(JSON.stringify(body));
+		const postData = body => fetch('./server.php', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(body)
 		});
 
 		const clearInputs = formElements => {
@@ -296,7 +286,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 			form.addEventListener('submit', e => {
 				e.preventDefault();
-				clearInputs(formElements);
 				ajaxLoader.add(message.status);
 				form.append(message.status);
 
@@ -308,8 +297,18 @@ window.addEventListener('DOMContentLoaded', () => {
 				});
 
 				postData(body)
-					.then(ajaxHandler.success)
-					.catch(ajaxHandler.error);
+					.then(response => {
+						if (response.status !== 200) {
+							throw new Error('Status !== 200');
+						}
+						ajaxHandler.success();
+					})
+					.catch(response => {
+						console.error(response);
+						ajaxHandler.error(response);
+					});
+
+				clearInputs(formElements);
 			});
 		});
 	};
@@ -492,14 +491,6 @@ window.addEventListener('DOMContentLoaded', () => {
 				}
 			}, 1);
 		};
-
-		// calcBlock.addEventListener('change', e => {
-		// 	const target = e.target;
-		//
-		// 	if (target.matches('select') || target.matches('input')) {
-		// 		countSum();
-		// 	}
-		// });
 
 		calcBlock.addEventListener('input', e => {
 			const regExp = /\D/;
