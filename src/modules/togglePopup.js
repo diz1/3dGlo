@@ -5,10 +5,12 @@ const togglePopup = () => {
 		popupStyles = getComputedStyle(popup);
 
 	const popupHandler = () => {
+		document.body.style.overflowY = 'hidden';
 		if (document.documentElement.clientWidth < 768) {
 			if (popupStyles.display === `none`) {
 				popup.style.display = `block`;
 			} else if (popupStyles.display === `block`) {
+				document.body.style.overflowY = '';
 				popup.style.display = `none`;
 			}
 		} else {
@@ -23,7 +25,7 @@ const togglePopup = () => {
 					popupContent.style.top = count + '%';
 
 					if (count > 20) clearInterval(timer);
-				}, 15);
+				}, 5);
 			} else if (popupStyles.display === `block`) {
 				count = 20;
 				const timer = setInterval(() => {
@@ -32,8 +34,11 @@ const togglePopup = () => {
 					popupContent.style.top = count + '%';
 
 					if (count === -50) clearInterval(timer);
-				}, 15);
-				setTimeout(() => popup.style.display = `none`, 1000);
+				}, 5);
+				setTimeout(() => {
+					document.body.style.overflowY = '';
+					popup.style.display = `none`;
+				}, 300);
 			}
 		}
 	};
