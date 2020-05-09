@@ -77,16 +77,19 @@ const sendForm = () => {
 	};
 
 	forms.forEach(form => {
-		const formElements = [...form],
-			reg = /^[^a-zа-я\s]+$/i;
+		const formElements = [...form];
+		let reg = '';
 
 		form.addEventListener('input', e => {
 			const target = e.target;
 			if (target.tagName.toLowerCase() === 'input' &&
-				(target.id !== 'form1-phone' && target.id !== 'form2-phone' && target.id !== 'form3-phone')) {
-				if (target.value !== '') {
-					target.value = target.value.replace(reg, '');
+				(!target.classList.contains('form-phone')) && target.value !== '') {
+				if (!target.classList.contains('form-email')) {
+					reg = /[^а-я\s]+/gi;
+				} else if (target.classList.contains('form-email')) {
+					reg = /[^\w@\.]+/gi;
 				}
+				target.value = target.value.replace(reg, '');
 			}
 		});
 
