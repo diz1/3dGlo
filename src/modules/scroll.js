@@ -1,36 +1,57 @@
 const scroll = () => {
-	const nextSlideBtn = document.querySelector(`main`).querySelector(`a`);
+	const nextSlideBtn = document.querySelector('main > a'),
+		menu = document.querySelector('menu');
 
-	const animate = ({ timing, draw, duration }) => {
+	const getAnimationScroll = target => {
+		const targetHREF = target.getAttribute('href')
+		if (targetHREF === `#service-block`) {
+			return 830;
+		}
+		if (targetHREF === `#portfolio`) {
+			return 1400;
+		}
+		if (targetHREF === `#calc`) {
+			return 2420;
+		}
+		if (targetHREF === `#command`) {
+			return 3480;
+		}
+		if (targetHREF === `#connect`) {
+			return 4370;
+		}
+	};
+
+	const animate = ({ timing, draw }, target) => {
 		const start = performance.now();
 
 		requestAnimationFrame(function animate(time) {
-			let timeFraction = (time - start) / duration;
-			if (timeFraction > 1) timeFraction = 1;
-
+			let timeFraction = (time - start) / 700;
 			const progress = timing(timeFraction);
 
 			draw(progress);
 
-			if (timeFraction < 1 && document.documentElement.scrollTop < 830) {
+			if (document.documentElement.scrollTop < getAnimationScroll(target)) {
 				requestAnimationFrame(animate);
 			}
 		});
 	};
 
-	nextSlideBtn.addEventListener('click', e => {
+	const clickHandler = e => {
 		e.preventDefault();
-		animate({
-			duration: 700,
-			timing(timeFraction) {
-				return timeFraction;
-			},
-			draw(progress) {
-				if (document.documentElement.scrollTop < 830) {
+		const target = e.target.closest('a');
+		if (target !== null) {
+			animate({
+				timing(timeFraction) {
+					return timeFraction;
+				},
+				draw(progress) {
 					document.documentElement.scrollTop += progress * 50;
 				}
-			}
-		});
-	});
+			}, target);
+		}
+	};
+
+	nextSlideBtn.addEventListener('click', clickHandler);
+	menu.addEventListener('click', clickHandler);
 };
 export default scroll;

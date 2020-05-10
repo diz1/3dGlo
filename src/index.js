@@ -24,7 +24,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // Таймер
 	countTimer(
-		'11 may 2020',
+		'12 may 2020',
 		'#timer-hours',
 		'#timer-minutes',
 		'#timer-seconds'

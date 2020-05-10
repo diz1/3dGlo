@@ -42,13 +42,18 @@ const calc = (price = 100) => {
 	calcBlock.addEventListener('input', e => {
 		const regExp = /\D/;
 		let target = e.target;
-		if (target.matches('select') || target.matches('input')) {
-			countSum();
-		}
 		target = target.closest('input.calc-item');
 		if (target) {
 			target.value = target.value.replace(regExp, '');
 		}
 	});
+
+	calcBlock.addEventListener('change', e => {
+		let target = e.target;
+		if (target.matches('select') || target.matches('input')) {
+			countSum();
+		}
+	});
+
 };
 export default calc;

@@ -3,6 +3,9 @@ const sendForm = () => {
 			error: `Что-то пошло не так`,
 			success: `Спасибо! Мы скоро с вами свяжемся!`,
 			status: document.createElement('div'),
+			remove() {
+				this.status.remove();
+			}
 		},
 		ajaxLoader = {
 			add(elem) {
@@ -21,14 +24,14 @@ const sendForm = () => {
 			error(status) {
 				ajaxLoader.remove(message.status);
 				message.status.textContent = message.error;
-				console.warn(status.code);
-				console.warn(status.text);
+				console.error(status);
 			}
 		},
 		forms = [...document.forms];
 	message.status.style.cssText = `
 			font-size: 2rem;
 			color: #fff;
+			margin: 2rem auto;
 		`;
 
 	function maskPhone(selector, masked = '+7 (___) ___-__-__') {
@@ -60,10 +63,6 @@ const sendForm = () => {
 		elem.addEventListener("blur", mask);
 	}
 
-	maskPhone('#form1-phone');
-	maskPhone('#form2-phone');
-	maskPhone('#form3-phone');
-
 	const postData = body => fetch('./server.php', {
 		method: 'POST',
 		headers: {
@@ -78,15 +77,15 @@ const sendForm = () => {
 
 	forms.forEach(form => {
 		const formElements = [...form];
-		let reg = '';
+		let reg = /[^а-я\s]+/gi;
+
+		formElements.forEach(item => item.classList.contains('form-phone') ? maskPhone(`#${item.id}`) : false);
 
 		form.addEventListener('input', e => {
 			const target = e.target;
 			if (target.tagName.toLowerCase() === 'input' &&
 				(!target.classList.contains('form-phone')) && target.value !== '') {
-				if (!target.classList.contains('form-email')) {
-					reg = /[^а-я\s]+/gi;
-				} else if (target.classList.contains('form-email')) {
+				if (target.classList.contains('form-email')) {
 					reg = /[^\w@\.]+/gi;
 				}
 				target.value = target.value.replace(reg, '');
@@ -95,27 +94,24 @@ const sendForm = () => {
 
 		form.addEventListener('submit', e => {
 			e.preventDefault();
+			message.status.classList.add('status');
 			ajaxLoader.add(message.status);
 			form.append(message.status);
 
 			const formData = new FormData(form);
 			const body = {};
 
-			formData.forEach((item, index) => {
-				body[index] = item;
-			});
+			formData.forEach((item, index) => body[index] = item);
 
 			postData(body)
 				.then(response => {
-					if (response.status !== 200) {
-						throw new Error('Status !== 200');
-					}
+					setTimeout(() => message.remove(message.status), 5000);
+
+					if (response.status !== 200) throw new Error(`${response.status} (${response.statusText})`);
+
 					ajaxHandler.success();
 				})
-				.catch(response => {
-					console.error(response);
-					ajaxHandler.error(response);
-				});
+				.catch(response => ajaxHandler.error(response));
 
 			clearInputs(formElements);
 		});
